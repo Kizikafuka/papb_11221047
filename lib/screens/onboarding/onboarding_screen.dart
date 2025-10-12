@@ -19,17 +19,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       "title": "Track Your Daily Moods",
       "desc": "Easily log your emotions and activities every day.",
-      "img": "assets/images/onboard1.png"
+      "img": "assets/images/welcome.png"
     },
     {
       "title": "Gain Valuable Insights",
       "desc": "See weekly mood charts and track your progress.",
-      "img": "assets/images/onboard1.png"
+      "img": "assets/images/welcome.png"
     },
     {
       "title": "Keep Calm and Motivated",
       "desc": "Breathing technique and quotes for you.",
-      "img": "assets/images/onboard1.png"
+      "img": "assets/images/welcome.png"
     },
   ];
 
@@ -93,7 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: PrimaryButton(
                 text: "Let's Get Started",
-                onPressed: () => context.go(AppRoutes.login),
+                onPressed: () => context.go(AppRoutes.checkinStart),
               ),
             )
           else
@@ -101,7 +101,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: TextButton(
                 child: const Text("Skip"),
-                onPressed: () => context.go(AppRoutes.login),
+                onPressed: () => context.go(AppRoutes.checkinStart),
               ),
             ),
           const SizedBox(height: 40),
