@@ -1,0 +1,31 @@
+name: coowdi
+description: A mood tracking Flutter app
+publish_to: "none" # remove if you ever publish this app
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^14.6.2
+  provider: ^6.1.2
+  cupertino_icons: ^1.0.8
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    # add more if needed, e.g.:
+    # - assets/icons/
+
+
