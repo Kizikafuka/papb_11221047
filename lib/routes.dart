@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'screens/splash_screen.dart';
@@ -6,12 +5,15 @@ import 'screens/welcome_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/checkin/checkin_start_screen.dart';
 import 'screens/checkin/checkin_detail_screen.dart';
+import 'screens/breathing/breathing_list_screen.dart';
+import 'screens/breathing/breathing_session_screen.dart';
 
 import 'screens/app_shell.dart';
 import 'screens/home_body.dart';
 import 'screens/calendar_body.dart';
 
 import 'models/mood.dart';
+import 'models/breathing_exercise.dart';
 
 // KUMPULAN PATH statis
 class AppRoutes {
@@ -20,6 +22,9 @@ class AppRoutes {
   static const onboarding = '/onboarding';
   static const checkinStart = '/checkin/start';
   static const checkinDetail = '/checkin/detail';
+  static const breathingList = '/breathing'; // Breathing exercise list
+  static const breathingSession =
+      '/breathing/session'; // Active breathing session
   static const shell = '/app';
   static const home = '/app/home';
   static const calendar = '/app/calendar';
@@ -49,7 +54,8 @@ GoRouter createRouter() {
         path: AppRoutes.checkinStart,
         builder: (_, state) {
           // Ambil DateTime dari state.extra (opsional), default: now
-          final date = (state.extra as Map?)?['date'] as DateTime? ?? DateTime.now();
+          final date =
+              (state.extra as Map?)?['date'] as DateTime? ?? DateTime.now();
           return CheckInStartScreen(date: date);
         },
       ),
@@ -67,6 +73,28 @@ GoRouter createRouter() {
         },
       ),
 
+      // Breathing exercises list
+      GoRoute(
+        path: AppRoutes.breathingList,
+        builder: (_, __) => const BreathingListScreen(),
+      ),
+
+      // Breathing exercise session (active breathing)
+      GoRoute(
+        path: AppRoutes.breathingSession,
+        builder: (_, state) {
+          // Get the breathing exercise from extra
+          final exercise = state.extra as BreathingExercise?;
+          if (exercise == null) {
+            // Fallback to a default exercise if none provided
+            return BreathingSessionScreen(
+              exercise: BreathingExercises.relaxation,
+            );
+          }
+          return BreathingSessionScreen(exercise: exercise);
+        },
+      ),
+
       // ——— ROUTE DENGAN SHELL PERSISTEN (AppShell) ———
       // ShellRoute: punya AppBar (tanggal) + FAB + BottomAppBar
       ShellRoute(
@@ -77,7 +105,8 @@ GoRouter createRouter() {
 
           return AppShell(
             child: child,
-            hideDateHeader: isCalendar, // di Calendar, sembunyikan header tanggal
+            hideDateHeader:
+                isCalendar, // di Calendar, sembunyikan header tanggal
           );
         },
         routes: [

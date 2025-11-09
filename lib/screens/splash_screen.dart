@@ -29,7 +29,8 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.emoji_emotions_outlined, size: 100, color: Colors.lightGreen[50]!),
+            Icon(Icons.emoji_emotions_outlined,
+                size: 100, color: Colors.lightGreen[50]!),
             const SizedBox(height: 20),
             Text("Coowdi",
                 style: TextStyle(fontSize: 28, color: Colors.lightGreen[50]!))

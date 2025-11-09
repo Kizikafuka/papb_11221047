@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../state/journal_state.dart';
 import '../models/mood.dart';
 import '../routes.dart';
+import '../widgets/weekly_stats_card.dart';
 import 'app_shell.dart';
 
 class CalendarBody extends StatefulWidget {
@@ -44,26 +45,41 @@ class _CalendarBodyState extends State<CalendarBody> {
 
   // Pindah ke bulan sebelumnya
   void _prevMonth() => setState(() {
-    _month = DateTime(_month.year, _month.month - 1, 1);
-    context.read<JournalState>().watchMonth(_month); // update stream
-  });
+        _month = DateTime(_month.year, _month.month - 1, 1);
+        context.read<JournalState>().watchMonth(_month); // update stream
+      });
 
   // Pindah ke bulan berikutnya
   void _nextMonth() => setState(() {
-    _month = DateTime(_month.year, _month.month + 1, 1);
-    context.read<JournalState>().watchMonth(_month); // update stream
-  });
+        _month = DateTime(_month.year, _month.month + 1, 1);
+        context.read<JournalState>().watchMonth(_month); // update stream
+      });
+
+  /// Get the Monday of the week containing the given date
+  DateTime _getMondayOfWeek(DateTime date) {
+    final weekday = date.weekday; // 1=Monday, 7=Sunday
+    return date.subtract(Duration(days: weekday - 1));
+  }
+
+  /// Get the current week's Monday based on displayed month
+  DateTime get _currentWeekStart {
+    final today = DateTime.now();
+    final todayMidnight = DateTime(today.year, today.month, today.day);
+    return _getMondayOfWeek(todayMidnight);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final shell = AppShell.of(context)!;               // akses shell buat set viewDate
-    final state = context.watch<JournalState>();       // observe state (biar grid update)
-    final fmtHeader = DateFormat('MMMM yyyy');         // contoh: October 2025
+    final shell = AppShell.of(context)!; // akses shell buat set viewDate
+    final state =
+        context.watch<JournalState>(); // observe state (biar grid update)
+    final fmtHeader = DateFormat('MMMM yyyy'); // contoh: October 2025
 
     final first = _firstOfMonth(_month);
     final last = _lastOfMonth(_month);
-    final startPad = _startPadMonFirst(first);         // jumlah sel kosong sebelum tgl 1
-    final totalDays = last.day;                        // total hari dlm bulan
+    final startPad =
+        _startPadMonFirst(first); // jumlah sel kosong sebelum tgl 1
+    final totalDays = last.day; // total hari dlm bulan
 
     // === Bangun sel hari (Mon-first) ===
     final cells = <Widget>[];
@@ -76,7 +92,7 @@ class _CalendarBodyState extends State<CalendarBody> {
     // Untuk tiap tanggal, bikin sel kalender
     for (int day = 1; day <= totalDays; day++) {
       final date = DateTime(_month.year, _month.month, day);
-      final entry = state.entryFor(date);         // cek apakah ada data mood hari itu
+      final entry = state.entryFor(date); // cek apakah ada data mood hari itu
       final bool hasEntry = entry != null;
 
       // Icon & warna sesuai ada/tidaknya entry
@@ -114,7 +130,8 @@ class _CalendarBodyState extends State<CalendarBody> {
                 CircleAvatar(
                   radius: 14, // diperkecil dari 16 → anti overflow
                   backgroundColor: bgColor,
-                  child: Icon(icon, size: 16, color: fgColor), // diperkecil dari 18
+                  child: Icon(icon,
+                      size: 16, color: fgColor), // diperkecil dari 18
                 ),
                 const SizedBox(height: 4), // diperkecil dari 6
                 // Teks tanggal (clamp line-height biar rapi)
@@ -132,7 +149,8 @@ class _CalendarBodyState extends State<CalendarBody> {
       );
     }
 
-    final bottomInset = MediaQuery.of(context).padding.bottom; // aman dari gesture bar
+    final bottomInset =
+        MediaQuery.of(context).padding.bottom; // aman dari gesture bar
 
     return SafeArea(
       top: true, // halaman ini nggak punya AppBar sendiri
@@ -163,6 +181,10 @@ class _CalendarBodyState extends State<CalendarBody> {
             ),
             const SizedBox(height: 12),
 
+            // ===== Weekly Statistics Card =====
+            WeeklyStatsCard(weekStart: _currentWeekStart),
+
+            const SizedBox(height: 12),
 
             // ===== Kartu kalender (rounded container) =====
             Expanded(
@@ -239,17 +261,17 @@ class _WeekdaysMonFirst extends StatelessWidget {
       children: labels
           .map(
             (t) => Expanded(
-          child: Center(
-            child: Text(
-              t,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelMedium
-                  ?.copyWith(fontWeight: FontWeight.w600),
+              child: Center(
+                child: Text(
+                  t,
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelMedium
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+              ),
             ),
-          ),
-        ),
-      )
+          )
           .toList(),
     );
   }

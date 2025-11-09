@@ -37,7 +37,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               // Description
               Text(
                 'Capture your moods and experiences through the language of emojis without any writing. '
-                    'Uncover patterns, delve into your feelings, and appreciate every moment, big or small.',
+                'Uncover patterns, delve into your feelings, and appreciate every moment, big or small.',
                 style: theme.textTheme.bodyLarge?.copyWith(height: 1.4),
               ),
               const SizedBox(height: 24),
@@ -48,7 +48,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   labelText: 'Language',
                   border: UnderlineInputBorder(),
                   prefixIcon: Icon(Icons.public),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(

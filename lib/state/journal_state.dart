@@ -13,9 +13,9 @@ class MoodEntry {
     required this.note,
   });
 
-  DateTime date;         // diset ke midnight (00:00) agar unik per-hari
+  DateTime date; // diset ke midnight (00:00) agar unik per-hari
   Mood mood;
-  List<String> tags;     // contoh: ['friends','date']
+  List<String> tags; // contoh: ['friends','date']
   String note;
 }
 
@@ -46,7 +46,7 @@ class JournalState extends ChangeNotifier {
     final key = dayKey(d);
     if (_byDay.containsKey(key)) return; // sudah ada di cache → selesai
 
-    final row = await _db.getEntry(d);   // query sekali (Future, non-stream)
+    final row = await _db.getEntry(d); // query sekali (Future, non-stream)
     if (row != null) {
       _byDay[key] = MoodEntry(
         date: row.date,
@@ -95,7 +95,6 @@ class JournalState extends ChangeNotifier {
           note: r.note,
         );
       }
-
 
       notifyListeners();
     });

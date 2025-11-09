@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../models/mood.dart';     // enum Mood + helper (label/icon/color)
-import '../../routes.dart';          // definisi path/route app
-import 'package:intl/intl.dart';     // format tanggal
+import '../../models/mood.dart'; // enum Mood + helper (label/icon/color)
+import '../../routes.dart'; // definisi path/route app
+import 'package:intl/intl.dart'; // format tanggal
 
 class CheckInStartScreen extends StatelessWidget {
   const CheckInStartScreen({super.key, required this.date});
@@ -40,8 +40,8 @@ class CheckInStartScreen extends StatelessWidget {
 
             // Grid responsif tombol mood (Wrap = auto pindah baris)
             Wrap(
-              spacing: 12,      // jarak horizontal antar tombol
-              runSpacing: 12,   // jarak vertikal antar baris tombol
+              spacing: 12, // jarak horizontal antar tombol
+              runSpacing: 12, // jarak vertikal antar baris tombol
               children: [
                 for (final m in moods)
                   _MoodButton(
@@ -70,7 +70,8 @@ class _MoodButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = moodColor(mood); // warna sesuai mood (helper dari models/mood.dart)
+    final color =
+        moodColor(mood); // warna sesuai mood (helper dari models/mood.dart)
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16), // ripple mengikuti border radius

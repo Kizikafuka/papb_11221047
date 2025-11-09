@@ -8,11 +8,12 @@ class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
     required this.child,
-    this.hideDateHeader = false,   // bisa sembunyikan header tanggal (mis. di halaman tertentu)
+    this.hideDateHeader =
+        false, // bisa sembunyikan header tanggal (mis. di halaman tertentu)
   });
 
-  final Widget child;              // konten halaman di dalam shell
-  final bool hideDateHeader;       // kontrol visibilitas header tanggal
+  final Widget child; // konten halaman di dalam shell
+  final bool hideDateHeader; // kontrol visibilitas header tanggal
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -42,7 +43,9 @@ class _AppShellState extends State<AppShell> {
 
   // Ubah tanggal tampilan, dan clamp supaya tidak melewati "hari ini"
   void setViewDate(DateTime d) {
-    final clamped = d.isAfter(today) ? today : _mid(d); // jika masa depan → paksa jadi today
+    final clamped = d.isAfter(today)
+        ? today
+        : _mid(d); // jika masa depan → paksa jadi today
     if (dateNotifier.value != clamped) dateNotifier.value = clamped;
   }
 
@@ -89,39 +92,42 @@ class _AppShellState extends State<AppShell> {
       appBar: widget.hideDateHeader
           ? null
           : AppBar(
-        title: ValueListenableBuilder<DateTime>(
-          valueListenable: dateNotifier,
-          builder: (context, date, _) {
-            final canGoNext = date.isBefore(today); // boleh maju jika belum hari ini
-            final label = DateFormat('EEEE, d MMM yyyy').format(date);
+              title: ValueListenableBuilder<DateTime>(
+                valueListenable: dateNotifier,
+                builder: (context, date, _) {
+                  final canGoNext =
+                      date.isBefore(today); // boleh maju jika belum hari ini
+                  final label = DateFormat('EEEE, d MMM yyyy').format(date);
 
-            // Catatan anti-overflow: pakai Flexible di tengah
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chevron_left),
-                  onPressed: prevDay,
-                  tooltip: 'Previous day',
-                ),
-                Flexible(
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis, // jaga kecil layar
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.chevron_right),
-                  onPressed: canGoNext ? nextDay : null, // disable jika sudah today
-                  tooltip: canGoNext ? 'Next day' : 'Today',
-                ),
-              ],
-            );
-          },
-        ),
-        centerTitle: true,
-      ),
+                  // Catatan anti-overflow: pakai Flexible di tengah
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        onPressed: prevDay,
+                        tooltip: 'Previous day',
+                      ),
+                      Flexible(
+                        child: Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis, // jaga kecil layar
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        onPressed: canGoNext
+                            ? nextDay
+                            : null, // disable jika sudah today
+                        tooltip: canGoNext ? 'Next day' : 'Today',
+                      ),
+                    ],
+                  );
+                },
+              ),
+              centerTitle: true,
+            ),
 
       // Body: expose dateNotifier ke anak-2 lewat InheritedWidget
       body: _ShellDateProvider(
@@ -141,7 +147,8 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
-        child: SafeArea( // tambahan: biar aman di perangkat dengan gesture bar
+        child: SafeArea(
+          // tambahan: biar aman di perangkat dengan gesture bar
           child: Row(
             children: [
               IconButton(
@@ -151,6 +158,11 @@ class _AppShellState extends State<AppShell> {
                   AppRoutes.home,
                   extra: {'date': viewDate}, // bawa tanggal yang sedang dilihat
                 ),
+              ),
+              IconButton(
+                tooltip: 'Breathing',
+                icon: const Icon(Icons.air),
+                onPressed: () => context.push(AppRoutes.breathingList),
               ),
               const Spacer(),
               IconButton(
@@ -178,13 +190,13 @@ class _ShellDateProvider extends InheritedWidget {
   const _ShellDateProvider({
     required this.notifier,
     required super.child,
-    super.key,
   });
 
   final ValueNotifier<DateTime> notifier;
 
   static ValueNotifier<DateTime> of(BuildContext context) =>
-      (context.dependOnInheritedWidgetOfExactType<_ShellDateProvider>()!).notifier;
+      (context.dependOnInheritedWidgetOfExactType<_ShellDateProvider>()!)
+          .notifier;
 
   @override
   bool updateShouldNotify(_ShellDateProvider oldWidget) =>
@@ -203,24 +215,24 @@ class _AddWhenSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SafeArea(
-    child: Wrap(
-      children: [
-        ListTile(
-          leading: const Icon(Icons.today),
-          title: const Text('Today'),
-          onTap: () => Navigator.pop(context, 'today'),
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.today),
+              title: const Text('Today'),
+              onTap: () => Navigator.pop(context, 'today'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_view_day),
+              title: const Text('Yesterday'),
+              onTap: () => Navigator.pop(context, 'yesterday'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.event),
+              title: const Text('Pick a date…'),
+              onTap: () => Navigator.pop(context, 'pick'),
+            ),
+          ],
         ),
-        ListTile(
-          leading: const Icon(Icons.calendar_view_day),
-          title: const Text('Yesterday'),
-          onTap: () => Navigator.pop(context, 'yesterday'),
-        ),
-        ListTile(
-          leading: const Icon(Icons.event),
-          title: const Text('Pick a date…'),
-          onTap: () => Navigator.pop(context, 'pick'),
-        ),
-      ],
-    ),
-  );
+      );
 }

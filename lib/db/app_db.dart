@@ -1,14 +1,14 @@
-import 'dart:io';                            // buat akses file lokal (SQLite file)
-import 'package:drift/drift.dart';           // package utama untuk ORM (Object Relational Mapping)
-import 'package:drift/native.dart';          // driver untuk database lokal (SQLite)
+import 'dart:io'; // buat akses file lokal (SQLite file)
+import 'package:drift/drift.dart'; // package utama untuk ORM (Object Relational Mapping)
+import 'package:drift/native.dart'; // driver untuk database lokal (SQLite)
 import 'package:path_provider/path_provider.dart'; // buat dapetin direktori aplikasi
-import 'package:path/path.dart' as p;        // bantu gabungin path file (misal "folder/namafile.sqlite")
+import 'package:path/path.dart'
+    as p; // bantu gabungin path file (misal "folder/namafile.sqlite")
 
-import '../models/mood.dart';                // enum Mood (VeryGood, Good, dll)
+import '../models/mood.dart'; // enum Mood (VeryGood, Good, dll)
 
 // ini penting biar Drift bisa generate kode otomatis (part file)
 part 'app_db.g.dart';
-
 
 // === KONVERTER ===
 // Konversi enum Mood <-> int biar bisa disimpan di database
@@ -32,16 +32,16 @@ class TagsConverter extends TypeConverter<List<String>, String> {
   List<String> fromSql(String fromDb) {
     if (fromDb.isEmpty) return const [];
     return fromDb
-        .split(',')                      // pisah berdasarkan koma
-        .map((e) => e.trim())            // hapus spasi di pinggir
-        .where((e) => e.isNotEmpty)      // buang yang kosong
+        .split(',') // pisah berdasarkan koma
+        .map((e) => e.trim()) // hapus spasi di pinggir
+        .where((e) => e.isNotEmpty) // buang yang kosong
         .toList();
   }
 
   @override
-  String toSql(List<String> value) => value.join(','); // gabung lagi jadi string
+  String toSql(List<String> value) =>
+      value.join(','); // gabung lagi jadi string
 }
-
 
 // === DEFINISI TABEL ===
 @DataClassName('DbMoodEntry') // nama class data hasil query
@@ -64,7 +64,6 @@ class MoodEntries extends Table {
   Set<Column> get primaryKey => {date};
 }
 
-
 // === DATABASE ===
 @DriftDatabase(tables: [MoodEntries])
 class AppDb extends _$AppDb {
@@ -77,12 +76,12 @@ class AppDb extends _$AppDb {
   // strategi migrasi (buat update versi database nanti)
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (m) => m.createAll(),  // saat pertama kali dibuat -> buat semua tabel
-    onUpgrade: (m, from, to) async {
-      // kalau nanti versi berubah bisa tambah alter table di sini
-    },
-  );
-
+        onCreate: (m) =>
+            m.createAll(), // saat pertama kali dibuat -> buat semua tabel
+        onUpgrade: (m, from, to) async {
+          // kalau nanti versi berubah bisa tambah alter table di sini
+        },
+      );
 
   // Tambah / update data mood (kalau tanggal udah ada -> update)
   Future<void> upsertEntry({
@@ -91,7 +90,8 @@ class AppDb extends _$AppDb {
     required List<String> tags,
     required String note,
   }) async {
-    final d0 = DateTime(date.year, date.month, date.day); // reset ke tengah malam
+    final d0 =
+        DateTime(date.year, date.month, date.day); // reset ke tengah malam
     await into(moodEntries).insertOnConflictUpdate(
       MoodEntriesCompanion(
         date: Value(d0),
@@ -121,18 +121,18 @@ class AppDb extends _$AppDb {
     final s0 = DateTime(start.year, start.month, start.day);
     final e0 = DateTime(end.year, end.month, end.day);
     return (select(moodEntries)
-      ..where((t) => t.date.isBetweenValues(s0, e0))
-      ..orderBy([(t) => OrderingTerm.asc(t.date)]))
+          ..where((t) => t.date.isBetweenValues(s0, e0))
+          ..orderBy([(t) => OrderingTerm.asc(t.date)]))
         .watch();
   }
 }
-
 
 // === FUNGSI BUKA DATABASE ===
 LazyDatabase _openDb() {
   return LazyDatabase(() async {
     final dir = await getApplicationDocumentsDirectory(); // direktori aplikasi
     final file = File(p.join(dir.path, 'coowdi.sqlite')); // nama file db
-    return NativeDatabase.createInBackground(file); // buat database di background
+    return NativeDatabase.createInBackground(
+        file); // buat database di background
   });
 }

@@ -5,14 +5,13 @@ import '../../models/mood.dart';
 import '../../routes.dart';
 import '../../state/journal_state.dart';
 
-
 // === SCREEN DETAIL ===
 // di sini user bisa nambah detail seperti tag (apa yang dilakukan) dan catatan
 class CheckInDetailScreen extends StatefulWidget {
   const CheckInDetailScreen({
     super.key,
-    required this.date,   // tanggal mood
-    required this.mood,   // mood yang dipilih
+    required this.date, // tanggal mood
+    required this.mood, // mood yang dipilih
   });
 
   final DateTime date;
@@ -61,7 +60,8 @@ class _CheckInDetailScreenState extends State<CheckInDetailScreen> {
           children: [
             // ===== Bagian atas: mood icon + label =====
             Row(children: [
-              Icon(moodIcon(mood), color: moodColor(mood)), // icon & warna sesuai mood
+              Icon(moodIcon(mood),
+                  color: moodColor(mood)), // icon & warna sesuai mood
               const SizedBox(width: 8),
               Text(
                 moodLabel(mood),
@@ -83,12 +83,13 @@ class _CheckInDetailScreenState extends State<CheckInDetailScreen> {
             Expanded(
               child: SingleChildScrollView(
                 child: Wrap(
-                  spacing: 8,        // jarak antar chip secara horizontal
-                  runSpacing: 8,     // jarak antar chip secara vertikal
+                  spacing: 8, // jarak antar chip secara horizontal
+                  runSpacing: 8, // jarak antar chip secara vertikal
                   children: _presets.map((p) {
                     final label = p.$1; // nama tag (misal "friends")
-                    final icon = p.$2;  // icon-nya
-                    final isSel = _selected.contains(label); // apakah tag ini dipilih?
+                    final icon = p.$2; // icon-nya
+                    final isSel =
+                        _selected.contains(label); // apakah tag ini dipilih?
 
                     // setiap tag = 1 FilterChip
                     return FilterChip(
@@ -140,8 +141,8 @@ class _CheckInDetailScreenState extends State<CheckInDetailScreen> {
                     MoodEntry(
                       date: widget.date,
                       mood: mood,
-                      tags: List.of(_selected),     // duplikat list biar aman
-                      note: _noteCtrl.text.trim(),  // hapus spasi kosong
+                      tags: List.of(_selected), // duplikat list biar aman
+                      note: _noteCtrl.text.trim(), // hapus spasi kosong
                     ),
                   );
 

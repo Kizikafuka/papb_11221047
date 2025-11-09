@@ -15,8 +15,8 @@ class PrimaryButton extends StatelessWidget {
         backgroundColor: Colors.lightGreen[900]!,
       ),
       onPressed: onPressed,
-      child: Text(text,
-          style: const TextStyle(color: Colors.white, fontSize: 16)),
+      child:
+          Text(text, style: const TextStyle(color: Colors.white, fontSize: 16)),
     );
   }
 }
