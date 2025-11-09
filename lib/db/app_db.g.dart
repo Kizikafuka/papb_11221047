@@ -88,16 +88,9 @@ class $MoodEntriesTable extends MoodEntries
 }
 
 class DbMoodEntry extends DataClass implements Insertable<DbMoodEntry> {
-  /// Store the date at midnight; use as primary key
   final DateTime date;
-
-  /// Store Mood as int via converter
   final Mood mood;
-
-  /// CSV tags via converter
   final List<String> tags;
-
-  /// Optional note
   final String note;
   const DbMoodEntry(
       {required this.date,

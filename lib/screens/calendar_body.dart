@@ -11,67 +11,75 @@ import 'app_shell.dart';
 
 class CalendarBody extends StatefulWidget {
   const CalendarBody({super.key, this.initialMonth});
-  final DateTime? initialMonth;
+  final DateTime? initialMonth; // opsional: bulan awal yang mau ditampilkan
 
   @override
   State<CalendarBody> createState() => _CalendarBodyState();
 }
 
 class _CalendarBodyState extends State<CalendarBody> {
+  // _month selalu diset ke tanggal 1 di bulan itu (jam 00:00)
   late DateTime _month; // first day of the month at midnight
 
   @override
   void initState() {
     super.initState();
+    // Tentukan bulan awal (dari param atau hari ini)
     final m = widget.initialMonth ?? DateTime.now();
     _month = DateTime(m.year, m.month, 1);
+
+    // Setelah frame pertama, minta JournalState mulai "mengamati" bulan ini
+    // (biasanya akan membuka stream watchRange ke DB lewat Drift)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final state = context.read<JournalState>();
       state.watchMonth(_month);
     });
-
   }
 
-
-
-  // Monday-first helpers
+  // ===== Helper tanggal: Monday-first =====
   DateTime _firstOfMonth(DateTime d) => DateTime(d.year, d.month, 1);
   DateTime _lastOfMonth(DateTime d) => DateTime(d.year, d.month + 1, 0);
-  // 0=Mon…6=Sun
+  // Konversi weekday ke index Mon=0..Sun=6 (Flutter: Mon=1..Sun=7)
   int _startPadMonFirst(DateTime first) => (first.weekday + 6) % 7;
 
+  // Pindah ke bulan sebelumnya
   void _prevMonth() => setState(() {
     _month = DateTime(_month.year, _month.month - 1, 1);
-    context.read<JournalState>().watchMonth(_month);
+    context.read<JournalState>().watchMonth(_month); // update stream
   });
 
+  // Pindah ke bulan berikutnya
   void _nextMonth() => setState(() {
     _month = DateTime(_month.year, _month.month + 1, 1);
-    context.read<JournalState>().watchMonth(_month);
+    context.read<JournalState>().watchMonth(_month); // update stream
   });
 
   @override
   Widget build(BuildContext context) {
-    final shell = AppShell.of(context)!;
-    final state = context.watch<JournalState>();
-    final fmtHeader = DateFormat('MMMM yyyy');
+    final shell = AppShell.of(context)!;               // akses shell buat set viewDate
+    final state = context.watch<JournalState>();       // observe state (biar grid update)
+    final fmtHeader = DateFormat('MMMM yyyy');         // contoh: October 2025
 
     final first = _firstOfMonth(_month);
     final last = _lastOfMonth(_month);
-    final startPad = _startPadMonFirst(first);
-    final totalDays = last.day;
+    final startPad = _startPadMonFirst(first);         // jumlah sel kosong sebelum tgl 1
+    final totalDays = last.day;                        // total hari dlm bulan
 
-    // Build day cells (Mon-first)
+    // === Bangun sel hari (Mon-first) ===
     final cells = <Widget>[];
+
+    // Isi padding di awal (mis. jika 1-nya jatuh di Kamis, isi 3 kosong dulu)
     for (int i = 0; i < startPad; i++) {
       cells.add(const SizedBox.shrink());
     }
 
+    // Untuk tiap tanggal, bikin sel kalender
     for (int day = 1; day <= totalDays; day++) {
       final date = DateTime(_month.year, _month.month, day);
-      final entry = state.entryFor(date);
+      final entry = state.entryFor(date);         // cek apakah ada data mood hari itu
       final bool hasEntry = entry != null;
 
+      // Icon & warna sesuai ada/tidaknya entry
       final IconData icon = hasEntry ? moodIcon(entry.mood) : Icons.add;
       final Color bgColor = hasEntry
           ? moodColor(entry.mood).withOpacity(.18)
@@ -85,14 +93,16 @@ class _CalendarBodyState extends State<CalendarBody> {
           borderRadius: BorderRadius.circular(12),
           onTap: () {
             if (hasEntry) {
+              // Kalau sudah ada entry, set viewDate di AppShell & balik ke Home
               shell.setViewDate(date);
               context.go(AppRoutes.home, extra: {'date': date});
             } else {
+              // Belum ada entry → mulai check-in di tanggal tsb
               context.go(AppRoutes.checkinStart, extra: {'date': date});
             }
           },
           child: Container(
-            // tighter padding so small phones don’t overflow
+            // Padding agak ketat supaya aman di layar kecil
             padding: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
@@ -100,14 +110,14 @@ class _CalendarBodyState extends State<CalendarBody> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // slightly smaller circle to avoid overflow on compact screens
+                // Lingkaran kecil berisi ikon mood (atau ikon tambah)
                 CircleAvatar(
-                  radius: 14, // was 16
+                  radius: 14, // diperkecil dari 16 → anti overflow
                   backgroundColor: bgColor,
-                  child: Icon(icon, size: 16, color: fgColor), // was 18
+                  child: Icon(icon, size: 16, color: fgColor), // diperkecil dari 18
                 ),
-                const SizedBox(height: 4), // was 6
-                // clamp text size/line-height to avoid pixel spill
+                const SizedBox(height: 4), // diperkecil dari 6
+                // Teks tanggal (clamp line-height biar rapi)
                 Text(
                   '$day',
                   style: Theme.of(context)
@@ -122,10 +132,10 @@ class _CalendarBodyState extends State<CalendarBody> {
       );
     }
 
-    final bottomInset = MediaQuery.of(context).padding.bottom;
+    final bottomInset = MediaQuery.of(context).padding.bottom; // aman dari gesture bar
 
     return SafeArea(
-      top: true, // Calendar has no AppBar
+      top: true, // halaman ini nggak punya AppBar sendiri
       left: false,
       right: false,
       bottom: true,
@@ -133,7 +143,7 @@ class _CalendarBodyState extends State<CalendarBody> {
         padding: EdgeInsets.fromLTRB(12, 8, 12, 12 + bottomInset),
         child: Column(
           children: [
-            // Month selector (header inside the body)
+            // ===== Header selector bulan (di dalam body) =====
             Row(
               children: [
                 _RoundIconBtn(icon: Icons.chevron_left, onTap: _prevMonth),
@@ -153,9 +163,8 @@ class _CalendarBodyState extends State<CalendarBody> {
             ),
             const SizedBox(height: 12),
 
-            // 👉 Removed the “emoji 1×” top bar you didn’t want
 
-            // Calendar card container (rounded)
+            // ===== Kartu kalender (rounded container) =====
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -168,17 +177,16 @@ class _CalendarBodyState extends State<CalendarBody> {
                 padding: const EdgeInsets.fromLTRB(12, 12, 12, 6),
                 child: Column(
                   children: [
-                    const _WeekdaysMonFirst(), // Mon..Sun
-                    const SizedBox(height: 6), // slightly tighter
-                    // Scrollable grid so it never overflows on small phones
+                    const _WeekdaysMonFirst(), // label Mon..Sun
+                    const SizedBox(height: 6),
+                    // Grid scrollable → anti overflow di HP kecil
                     Expanded(
                       child: GridView.count(
                         crossAxisCount: 7,
-                        // make cells a bit taller (smaller ratio) to prevent
-                        // “bottom overflowed by 2–3 pixels” on compact devices
-                        childAspectRatio: 0.78, // was 0.86
-                        mainAxisSpacing: 6,     // was 8
-                        crossAxisSpacing: 6,    // was 8
+                        // Aspect ratio sedikit lebih kecil biar sel lebih tinggi
+                        childAspectRatio: 0.78,
+                        mainAxisSpacing: 6,
+                        crossAxisSpacing: 6,
                         padding: const EdgeInsets.only(bottom: 8),
                         children: cells,
                       ),
@@ -194,8 +202,7 @@ class _CalendarBodyState extends State<CalendarBody> {
   }
 }
 
-// — UI bits — //
-
+// — UI kecil: tombol bulat panah kiri/kanan —
 class _RoundIconBtn extends StatelessWidget {
   const _RoundIconBtn({required this.icon, required this.onTap});
   final IconData icon;
@@ -211,8 +218,9 @@ class _RoundIconBtn extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          border:
-          Border.all(color: Theme.of(context).dividerColor.withOpacity(.3)),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withOpacity(.3),
+          ),
         ),
         child: Icon(icon, size: 20),
       ),
@@ -220,6 +228,7 @@ class _RoundIconBtn extends StatelessWidget {
   }
 }
 
+// Label hari (Mon-first)
 class _WeekdaysMonFirst extends StatelessWidget {
   const _WeekdaysMonFirst();
 
